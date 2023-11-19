@@ -11,6 +11,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 
+
 class Controller:
 
     def __init__(self, login_input):
@@ -83,7 +84,6 @@ class Controller:
 
             # add 1 to daily_lessons in user file
             data = load_dict('!users/' + self.login + '.json')
-            print('You exceeded your daily lessons limit! ')
             data['lessons_today'] += 1
             export(data, '!users/' + self.login + '.json')
 

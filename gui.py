@@ -1,4 +1,5 @@
 import os
+import datetime
 from selenium.common import ElementClickInterceptedException
 import customtkinter as ctk
 import functions
@@ -13,10 +14,9 @@ class Gui(ctk.CTk):
 
         # create app window
         ctk.set_appearance_mode("dark")
-        self.geometry('1200x600')
+        self.geometry('1000x600')
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=2)
-        self.grid_columnconfigure(2, weight=6)
         self.grid_rowconfigure(0, weight=1)
 
         # create scrollable frame for user data
@@ -60,7 +60,13 @@ class Gui(ctk.CTk):
         self.start_btn.grid(row=4, column=1, padx=10, pady=10, sticky="w")
 
     def user_box(self, user_file, i):  # create box in scrollable user frame for user_file data
+        today_date = datetime.date.today()  # get today's date
+        modification_date = datetime.date.fromtimestamp(os.path.getatime('!users/' + user_file))  # get timestamp date from user file and convert it into datetime format
         data = functions.load_dict('!users/' + user_file)
+
+        if today_date != modification_date:  # check if user has saved progress info from another day, if yes set it to 0
+            data['lessons_today'] = 0
+
         box = ctk.CTkFrame(self.scr_users, fg_color='#434952')
         self.users_list.append(box)
         box.grid_columnconfigure(0, weight=4)
@@ -120,7 +126,6 @@ class Gui(ctk.CTk):
         for box in self.users_list:
             box.destroy()
         self.users_list = []
-        self.users_files = os.listdir('!users/')
         for i, file in enumerate(self.users_files):
             self.user_box(file, i)
 
