@@ -83,9 +83,10 @@ class Controller:
                         self.click(next_btn)
 
             # add 1 to daily_lessons in user file
-            data = load_dict('!users/' + self.login + '.json')
-            data['lessons_today'] += 1
-            export(data, '!users/' + self.login + '.json')
+            if os.path.exists('!users/' + self.login + '.json'):
+                data = load_dict('!users/' + self.login + '.json')
+                data['lessons_today'] += 1
+                export(data, '!users/' + self.login + '.json')
 
             if self.driver.current_url == 'https://lingos.pl/students/group/finished':
                 self.driver.get('https://lingos.pl/students/group')

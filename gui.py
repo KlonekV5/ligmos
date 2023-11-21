@@ -10,6 +10,7 @@ class Gui(ctk.CTk):
         super().__init__()
         self.users_list = []
         self.users_files = os.listdir('!users/')  # load files from !users/
+        self.progress_reset()  # check if user has saved progress info from another day, if yes set it to 0
         self.title('Ligmos')
 
         # create app window
@@ -59,14 +60,17 @@ class Gui(ctk.CTk):
         self.start_btn = ctk.CTkButton(self.main_frame, text="Start doing lessons", command=self.start_lesson)
         self.start_btn.grid(row=4, column=1, padx=10, pady=10, sticky="w")
 
-    def user_box(self, user_file, i):  # create box in scrollable user frame for user_file data
+    def progress_reset(self):
         today_date = datetime.date.today()  # get today's date
-        modification_date = datetime.date.fromtimestamp(os.path.getatime('!users/' + user_file))  # get timestamp date from user file and convert it into datetime format
+        for file in self.users_files:
+            data = functions.load_dict('!users/' + file)
+            modification_date = datetime.date.fromtimestamp(os.path.getmtime('!users/' + file))  # get timestamp date from user file and convert it into datetime format
+            if today_date != modification_date:  # check if user has saved progress info from another day, if yes set it to 0
+                data['lessons_today'] = 0
+            functions.export(data, '!users/' + file)
+
+    def user_box(self, user_file, i):  # create box in scrollable user frame for user_file data
         data = functions.load_dict('!users/' + user_file)
-
-        if today_date != modification_date:  # check if user has saved progress info from another day, if yes set it to 0
-            data['lessons_today'] = 0
-
         box = ctk.CTkFrame(self.scr_users, fg_color='#434952')
         self.users_list.append(box)
         box.grid_columnconfigure(0, weight=4)
@@ -131,6 +135,8 @@ class Gui(ctk.CTk):
 
     def delete_user(self, user_file):  # delete specific user data and refresh list
         os.remove('!users/' + user_file)
+        if os.path.exists('!databases/' + user_file):
+            os.remove('!databases/' + user_file)
         self.users_files = os.listdir('!users/')
         self.load_user_list()
 
@@ -148,3 +154,4 @@ class Gui(ctk.CTk):
             data['lessons_today'] = 5
             functions.export(data, '!users/' + login + '.json')
         functions.export(controller.dictionary, '!databases/' + login + '.json')  # save user database of words from lingos
+        self.load_user_list()
